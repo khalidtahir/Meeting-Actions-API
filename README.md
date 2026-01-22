@@ -53,15 +53,6 @@ Elena and David need to sync on S3 permissions.
 
 ---
 
-## What This Project Is Not
-
-- Not a real-time transcription system
-- Not a frontend application
-- Not a fully deployed SaaS product
-
-This repository represents a **backend MVP**, optimized for clarity, correctness, and interview discussion.
-
----
 
 ## Architecture
 
@@ -113,7 +104,7 @@ LICENSE
 
 ---
 
-## Core Technical Concepts Demonstrated
+## Core Concepts
 
 ### REST API Design
 
@@ -202,29 +193,6 @@ This mirrors real-world asynchronous workflows while remaining synchronous for s
 
 ---
 
-## Design Decisions and Tradeoffs
-
-### Why FastAPI
-
-- High performance
-- First-class typing support
-- Built-in OpenAPI generation
-- Clean dependency injection
-
-### Why SQLite
-
-- Zero configuration
-- Ideal for MVPs and interviews
-- Easily replaceable with PostgreSQL for production
-
-### Why Synchronous Processing
-
-- Simplifies control flow
-- Easier to debug and test
-- Clear upgrade path to background jobs
-
----
-
 ## Future Extensions
 
 - Background processing (Celery / Redis)
@@ -237,14 +205,7 @@ This mirrors real-world asynchronous workflows while remaining synchronous for s
 
 ---
 
-## Interview Talking Points
 
-- Clear separation between HTTP, business logic, and data layers
-- Status-driven processing to avoid race conditions
-- Mockable AI layer for testability and cost control
-- Designed for extensibility without over-engineering
-
----
 
 ## License
 
