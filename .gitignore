@@ -11,6 +11,13 @@ venv/
 # Database
 *.db
 
+# Documentation files (development only)
+REFINEMENT_SUMMARY.md
+QUICK_REFERENCE.md
+JSON_SCHEMA_REFERENCE.md
+REFINEMENT_COMPLETE.md
+REFINEMENT_IMPLEMENTATION_COMPLETE.md
+
 # OS
 .DS_Store
 Thumbs.db

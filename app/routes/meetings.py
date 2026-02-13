@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Meeting, MeetingStatus, Action
+from models import Meeting, MeetingStatus, Action, Project
 from schemas import MeetingCreate, MeetingResponse, MeetingDetailResponse
 from services.action_extractor import get_action_extractor, ActionExtractionError
 
@@ -20,10 +20,20 @@ def create_meeting(
 ):
     """
     Create a new meeting with transcript.
+    Meeting must belong to an existing project.
     Initial status is PENDING - call /process to extract actions.
     """
+    # Verify project exists
+    project = db.query(Project).filter(Project.id == meeting_data.project_id).first()
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Project {meeting_data.project_id} not found"
+        )
+    
     # Create meeting entity
     meeting = Meeting(
+        project_id=meeting_data.project_id,
         title=meeting_data.title,
         transcript=meeting_data.transcript,
         status=MeetingStatus.PENDING

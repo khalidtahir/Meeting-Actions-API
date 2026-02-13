@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
 from database import init_db
-from routes import meetings, actions
+from routes import meetings, actions, projects
 
 # Initialize settings
 settings = get_settings()
@@ -61,6 +61,7 @@ def health_check():
 # Register route modules
 app.include_router(meetings.router)
 app.include_router(actions.router)
+app.include_router(projects.router)
 
 
 if __name__ == "__main__":

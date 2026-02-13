@@ -4,30 +4,41 @@ These define the API contract and handle serialization.
 """
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
-from typing import List
-from models import MeetingStatus
+from typing import List, Optional
+from models import MeetingStatus, ActionStatus
 
 
 # ============= Request Schemas =============
 
 class MeetingCreate(BaseModel):
     """Request body for creating a new meeting."""
+    project_id: str = Field(..., description="Project ID this meeting belongs to")
     title: str = Field(..., min_length=1, max_length=200, description="Meeting title")
     transcript: str = Field(..., min_length=10, description="Meeting transcript text")
 
 
-# ============= Response Schemas =============
+class ProjectCreate(BaseModel):
+    """Request body for creating a new project."""
+    name: str = Field(..., min_length=1, max_length=200, description="Project name")
+    description: Optional[str] = Field(None, max_length=1000, description="Optional project description")
+
+
+
 
 class ActionResponse(BaseModel):
     """
     Response schema for a single action item.
     Validates confidence is in valid range.
+    Includes status tracking and week assignment.
     """
     id: str
     meeting_id: str
     type: str
     description: str
     confidence: float = Field(..., ge=0.0, le=1.0)
+    status: ActionStatus = Field(default=ActionStatus.OPEN)
+    week_number: Optional[int] = None
+    owner: Optional[str] = None
     
     class Config:
         from_attributes = True  # Allows conversion from ORM models
@@ -40,6 +51,7 @@ class MeetingResponse(BaseModel):
     """
     id: str
     title: str
+    project_id: str
     status: MeetingStatus
     created_at: datetime
     
@@ -53,6 +65,28 @@ class MeetingDetailResponse(MeetingResponse):
     Use sparingly since transcripts can be large.
     """
     transcript: str
+
+
+class ProjectResponse(BaseModel):
+    """
+    Response schema for project metadata.
+    Lists project basics without nested meetings.
+    """
+    id: str
+    name: str
+    description: Optional[str] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class ProjectDetailResponse(ProjectResponse):
+    """
+    Extended project response with meeting count.
+    Provides overview of project activity.
+    """
+    meeting_count: int = 0
 
 
 class MeetingActionsResponse(BaseModel):
@@ -93,3 +127,70 @@ class AIExtractionResponse(BaseModel):
     Validates entire response before processing.
     """
     actions: List[ExtractedAction]
+
+
+# ============= Reconciliation Schemas =============
+
+class PriorActionReference(BaseModel):
+    """
+    Reference to a prior OPEN action marked as completed or carryover.
+    Must include the original action ID from the system.
+    Used only for reconciliation of existing actions.
+    """
+    id: str = Field(..., description="Original action ID from system - MUST match prior action")
+    description: str = Field(..., description="Action description")
+    owner: Optional[str] = Field(None, description="Responsible person")
+
+
+class ReconciliationActionItem(BaseModel):
+    """
+    Single NEW action item created during reconciliation.
+    Does NOT include ID (these are newly created actions).
+    """
+    description: str = Field(..., description="Action description")
+    owner: Optional[str] = Field(None, description="Responsible person")
+
+
+class ReconciliationRequest(BaseModel):
+    """
+    Request body for project reconciliation.
+    Provides new meeting transcript for LLM to interpret.
+    """
+    meeting_title: str = Field(..., description="Title of new meeting")
+    transcript: str = Field(..., min_length=10, description="Meeting transcript")
+    week_number: int = Field(..., ge=1, description="Week number for this reconciliation")
+
+
+class AIReconciliationResponse(BaseModel):
+    """
+    Expected structure from LLM for reconciliation.
+    Strictly JSON output - no free-form text.
+    
+    - completed: Prior OPEN actions now marked COMPLETED (with original IDs)
+    - carryover: Prior OPEN actions still pending (with original IDs)
+    - new_actions: New actions extracted from meeting (no IDs)
+    - risk_flags: Concerns or blockers identified
+    - summary: Executive summary paragraph
+    """
+    completed: List[PriorActionReference] = Field(default_factory=list)
+    carryover: List[PriorActionReference] = Field(default_factory=list)
+    new_actions: List[ReconciliationActionItem] = Field(default_factory=list)
+    risk_flags: List[str] = Field(default_factory=list)
+    summary: str = Field(..., description="Executive summary paragraph")
+
+
+class ReconciliationResponse(BaseModel):
+    """
+    Response after successful reconciliation.
+    Summarizes database updates made.
+    """
+    meeting_id: str
+    project_id: str
+    week_number: int
+    actions_completed: int
+    actions_carried_over: int
+    actions_new: int
+    report_path: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
