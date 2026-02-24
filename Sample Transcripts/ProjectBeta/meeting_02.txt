@@ -1,0 +1,24 @@
+Project Beta – Week 2 – 10 Feb 2026
+Attendees: Nina, Omar, Lisa, Ken, Jade
+
+Nina: Where we are. Ken, did the segment deck go out?
+
+Ken: Yeah, it’s in the shared drive and I’ve linked it in the chat. Summary: mobile users are doing shorter sessions and care most about “finish one thing fast” – so the first action should be something completable in one go, not a multi-step setup.
+
+Omar: That lines up with what I’m hearing in the first two interviews. I’ve got three more this week. So far the main theme is “don’t make me think” – they want to land in the app and do one clear thing. So I’m leaning toward “first action = create or complete a single task” rather than “configure your workspace”.
+
+Lisa: Competitor analysis is done. I’ve sent the one-pager. TL;DR: most of the apps we looked at do a single primary CTA on first launch and defer everything else. So we’re not way off. One thing: several of them use a short “what do you want to do?” picker before the main flow. We could consider that.
+
+Jade: So we’re converging on “one primary action” for first run. Do we want that to be “create a task” or “complete a suggested task” or something else? I’d like to lock that before I start mocking.
+
+Nina: Let’s use Omar’s remaining interviews to test that. Omar, can you add a question like “when you first opened the app, what did you expect to do?” and see if we get a clear pattern?
+
+Omar: I’ll add that. I’ll have the full summary and recommendation by end of next week.
+
+Ken: One more thing – we need to make sure analytics is set up so we can measure “completed first action” in beta. I’ll add that to the spec and loop in the data team.
+
+Nina: So: Omar to finish interviews and share summary with a recommendation on “first action”. Jade to hold on mocks until we have that. Ken to sort analytics for the beta. Lisa, anything else from the competitor work we should document?
+
+Lisa: I’ll add a “risks” section – a couple of the apps we looked at had backlash when they changed onboarding. So we should plan a way to roll back or A/B test.
+
+Nina: Good. We’ll add that to the beta plan. Same time next week.

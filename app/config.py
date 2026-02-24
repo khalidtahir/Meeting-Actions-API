@@ -3,6 +3,7 @@ Configuration management for the application.
 Keeps environment-specific settings in one place.
 """
 from pydantic_settings import BaseSettings
+from pydantic import Field
 from functools import lru_cache
 
 
@@ -15,7 +16,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./meetings.db"
     
     # AI Service (OpenAI/Anthropic)
-    ai_api_key: str = ""  # Set via OPENAI_API_KEY or ANTHROPIC_API_KEY env var
+    ai_api_key: str = Field(default="", validation_alias="OPENAI_API_KEY")  # or ANTHROPIC_API_KEY
     ai_provider: str = "openai"  # or "anthropic"
     ai_model: str = "gpt-4o-mini"  # or "claude-3-5-sonnet-20241022"
     ai_max_tokens: int = 2000

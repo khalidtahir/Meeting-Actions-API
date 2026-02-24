@@ -1,0 +1,24 @@
+Project Alpha – Week 3 sync – 26 Jan 2026
+Attendees: Sarah, David, Elena, James, Priya
+
+Sarah: Week 3. David, did you get S3 access and get the E2E run done?
+
+David: Yeah, access came through Wednesday. Elena and I ran the full flow yesterday – submit with new auth, job runs, we get the result back. So that’s done. The migration guide is updated with the “what’s different” section and the note about the Currency API header that James added.
+
+Elena: One blocker: the regression suite is still flaky. We’re seeing timeouts on the big uploads. I’m not sure yet if it’s the test harness or the new path. I’ll dig in this week and either fix the tests or document what we’re skipping and why.
+
+James: I can take a look at the flaky tests if you want a second pair of eyes. I’ve got capacity now that the Currency API fix is merged.
+
+Elena: That would help. I’ll share the runbook and the failing job links.
+
+Priya: On the timeline – we’re still on track for “spec and migration guide approved” by end of last week. So first milestone is done. Next is “E2E green and regression stable”. So Elena’s work on the flaky tests is the critical path.
+
+Sarah: Agreed. James and Elena, sync on the tests. David, anything else blocking the spec from being “locked”?
+
+David: Only the rate limit numbers. Product said they’ll get us a number by Tuesday. Once we have that I’ll drop it in and we can call the spec locked.
+
+Sarah: So for next time: Elena and James to get the regression suite stable or documented. David to lock the spec once rate limits are in. Priya, can you send the retro template today so we can do the retro at the start of next meeting?
+
+Priya: I’ll send it today.
+
+Sarah: Any other blockers? … Okay, same time next week. Thanks everyone.

@@ -1,0 +1,24 @@
+Project Epsilon – Analytics dashboard kickoff – 28 Jan 2026
+Attendees: Max, Zoe, Leo, Mia, Eli
+
+Max: We’re kicking off the internal analytics dashboard. The goal is to give the team a single place to see key metrics – usage, errors, cost – without digging through multiple tools.
+
+Zoe: So this is internal only, not something we ship to customers?
+
+Max: Right. Internal only. No customer-facing analytics in this project. We might do that later, but for now it’s just for us.
+
+Leo: What data sources are we pulling from? I’m assuming we have events, the main DB, and maybe the data warehouse.
+
+Mia: Yes. Events for usage and funnels, the main DB for operational stuff, and the warehouse for aggregated reporting. I’ll send a short schema doc so we know what’s available. We need to be careful not to expose PII – the dashboard should only show aggregates and counts, no raw user data.
+
+Eli: How do we connect to the warehouse? Is there an existing connection we can use or do we need to set up something new?
+
+Max: There’s an existing read-only connection. Eli, I’ll get you the details and you can set up the dashboard service to use it. We’ll need to define which metrics we want on the first version. Zoe, can you own the list of “must-have” metrics and the rough layout?
+
+Zoe: I’ll draft a one-pager with the metrics and a simple wireframe. We can iterate. Do we have a preference for how we build the UI – something like Metabase or a custom app?
+
+Max: Custom for now so we can control exactly what we show and how we secure it. We’ll use the same auth as the rest of the internal tools. Leo, can you own the API that the dashboard calls – the aggregation and the caching so we’re not hitting the warehouse on every page load?
+
+Leo: I’ll build an API layer that pre-aggregates the main metrics and caches them. We can decide TTL per metric – like, real-time might be 1 minute, daily rollups might be 1 hour. Max, can you define that?
+
+Max: I’ll add a short “cache TTL” matrix to the one-pager. So: Mia to send the schema and PII constraints. Zoe to draft the metrics list and wireframe. Leo to design the aggregation API and caching. Eli to set up the warehouse connection and the dashboard app shell. We’ll meet weekly. Same time next week.

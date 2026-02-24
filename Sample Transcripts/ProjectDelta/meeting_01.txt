@@ -1,0 +1,30 @@
+Project Delta – Search and discovery kickoff – 5 Feb 2026
+Attendees: Alex, Jordan, Sam, Taylor, Morgan
+
+Alex: We’re here to kick off the search and discovery work. The goal is to improve relevance and make it easier for users to find what they need without scrolling through everything.
+
+Jordan: So we’re touching the ranking model and the index, or just the UI?
+
+Alex: Both. We’re not changing the product UI in this project – we’re improving the backend: ranking and the index pipeline. The front-end will keep calling the same search API; we’re just making the results better and adding filters.
+
+Sam: What’s the current state of the index? Is it batch or real time?
+
+Taylor: Right now it’s batch – we rebuild nightly. So anything created or updated during the day doesn’t show up in search until the next run. So part of this project is to move to incremental or near-real-time updates.
+
+Morgan: So we have three threads: one, improve the ranking model. Two, fix the index so it’s up to date. Three, add faceted search – filters by category, date, whatever. Are we doing all three in parallel or in sequence?
+
+Alex: In parallel where we can. Jordan, you own the ranking model – we need a way to measure “better”. So we need a baseline and a metric. Can you propose something?
+
+Jordan: I’ll run the current model on a labelled set and get NDCG or something similar. Then we can compare when we change the model. I’ll need a sample of queries and relevance judgements. Do we have that?
+
+Morgan: I can export a set from support tickets – “user searched for X and we think the right result was Y”. It won’t be perfect but it’s a start. I’ll get that to you by Friday.
+
+Taylor: I’ll own the faceted search – add category, date range, and source as filter params. The API contract will stay the same; we’re just adding optional params. I’ll need to align with the index schema. Sam, when we move to incremental index updates, will that change the schema or just the pipeline?
+
+Sam: Just the pipeline. The schema can stay; we’ll add a “last updated” or similar so we know what to reindex. I’ll own the pipeline change and the rollout plan so we don’t break production.
+
+Alex: So: Jordan to baseline the current ranking and propose a metric. Morgan to provide the query/relevance sample. Taylor to add faceted search params and align with Sam on the index. Sam to move the index to incremental updates. We’ll meet weekly. Any questions?
+
+Jordan: What’s the timeline?
+
+Alex: Target is “new ranking and facets live in staging” in six weeks. Full production rollout after that. Let’s wrap. Same time next week.

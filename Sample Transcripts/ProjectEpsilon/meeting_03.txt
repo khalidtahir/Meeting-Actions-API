@@ -1,0 +1,16 @@
+Project Epsilon – Week 3 – 11 Feb 2026
+Attendees: Max, Zoe, Leo, Mia, Eli
+
+Max: Leo, how’s the API?
+
+Leo: The main endpoints are done. We have usage, errors, and cost. Caching is working. I’ve added the data freshness field so the UI can show “last updated X minutes ago”. Eli and I have wired the dashboard to the API and we’re seeing real numbers in staging.
+
+Eli: RLS is in place on the warehouse. The dashboard service only has access to the agreed views. I’ve documented the policy in the wiki. The UI is still rough but functional – we can see the three sections Zoe designed.
+
+Zoe: I’ve reviewed the staging dashboard. A few tweaks: can we add a simple trend – up or down vs last period – next to each metric? And can we make the error section highlight if the rate is above a threshold?
+
+Leo: I can add the trend in the API – we’re already pulling last period. For the threshold, we could add a configurable limit and return a flag. I’ll do both this week.
+
+Mia: One more thing – we should add an audit log for who accessed the dashboard. Just “user X viewed at time Y” so we can satisfy compliance. It doesn’t need to be in the first release but we should plan for it.
+
+Max: I’ll add it to the backlog. So for next week: Leo to add trend and error threshold. Eli to polish the UI and add the trend display. Zoe to review again once that’s in. We’re close to “first version done”. Same time next week.

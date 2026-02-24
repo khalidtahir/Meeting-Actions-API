@@ -1,0 +1,18 @@
+Project Epsilon – Week 2 – 4 Feb 2026
+Attendees: Max, Zoe, Leo, Mia, Eli
+
+Max: Where we are. Mia, did the schema doc go out?
+
+Mia: Yes, it’s in the drive. I’ve highlighted the tables we can use and the ones that are PII-heavy so we avoid them. For the dashboard we should only use the aggregated views and the event rollups.
+
+Zoe: I’ve sent the metrics list and a simple wireframe. We have three main sections: usage (requests, active users, top endpoints), errors (rate, top error types), and cost (by service, trend). I’ve added the cache TTL matrix – real-time metrics refresh every 1 minute, daily rollups every hour.
+
+Leo: I’ve started the aggregation API. I’m pulling from the warehouse for the daily rollups and from the events stream for the real-time bits. Caching is in place. One gap: we need row-level security on the warehouse so this service can only see the tables we’ve agreed. Eli, can we set that up?
+
+Eli: I’ll add RLS and document the policy. The connection from the dashboard app to the API is working; I’ve got a placeholder UI that shows “Dashboard” and a couple of test numbers. Once Leo’s API is stable I’ll wire the UI to it.
+
+Max: So we’re on track. Leo to finish the API and work with Eli on RLS. Zoe, anything else on the metrics list?
+
+Zoe: I’d like to add a “data freshness” indicator so we know when the last run was. I’ll add that to the spec.
+
+Max: Good. Same time next week.

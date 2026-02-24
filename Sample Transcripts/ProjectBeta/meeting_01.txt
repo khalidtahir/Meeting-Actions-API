@@ -1,0 +1,32 @@
+Project Beta – Discovery kickoff – 3 Feb 2026
+Attendees: Nina, Omar, Lisa, Ken, Jade
+
+Nina: Okay, we’re kicking off the mobile app redesign. I want to make sure we’re all aligned on the problem we’re solving and how we’ll run this phase.
+
+Omar: So the brief I got was “improve retention and time-to-value on mobile”. Is that the same thing you’re working from?
+
+Nina: Yes. We’ve got data that says people install, open once or twice, and then drop. So the goals for this project are: one, understand why – that’s the research phase. Two, propose a new onboarding and first-session experience. Three, get to a beta we can test with real users. We’re not committing to a full redesign of the whole app; we’re scoping to onboarding and the first three in-app actions.
+
+Lisa: Who are we designing for? Same as desktop or do we have a different segment on mobile?
+
+Ken: We’ve got a segment breakdown. I’ll share the deck – basically mobile skews younger and more “quick task” than desktop. So the “first three actions” might need to be different on mobile vs desktop.
+
+Jade: So we’re not just porting the desktop onboarding to mobile. We’re deciding what “first three actions” mean on mobile and then designing around that.
+
+Nina: Right. So the project is: research, then define the mobile-first “first three actions”, then design and build a new flow, then beta. Omar, you’re leading research – what’s the plan?
+
+Omar: I’m thinking five user interviews in the next two weeks. We recruit from the segment Ken’s talking about. I’ll have a summary of themes and a short report. Then we can use that to lock the “first three actions” and hand off to design.
+
+Lisa: I can own the competitor pass – what do other apps do for onboarding and first run. That’ll give us a baseline before we get too deep in our own ideas.
+
+Jade: I’ll own the actual design of the new flow once we have the actions. So the sequence is: Ken shares the segment deck, Omar runs interviews and shares findings, Lisa does competitor analysis, then we align on the three actions, then I design and we build. What’s the timeline?
+
+Nina: Target is beta in eight weeks. So we need the research and the “three actions” decision in the next three weeks. Then five weeks for design, build, and test. Ken, can you get the segment deck to everyone by end of week? Omar, when do you think you’ll have the interview summary?
+
+Omar: Two weeks from today. I’ll need help with recruitment – I’ll send a brief to the list.
+
+Nina: Lisa, when can we have the competitor one-pager?
+
+Lisa: I’ll aim for next Friday. I’ll pull from the usual set and add a couple of new ones we’ve been looking at.
+
+Nina: So next steps: Ken to share segment deck. Omar to run five interviews and share findings in two weeks. Lisa to do competitor analysis and share by next Friday. Jade to wait for the “three actions” decision and then own design. We’ll meet weekly and adjust. Any questions? … Let’s wrap. Same time next week.

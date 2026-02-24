@@ -44,6 +44,36 @@ class ActionResponse(BaseModel):
         from_attributes = True  # Allows conversion from ORM models
 
 
+class ActionUpdate(BaseModel):
+    """Request body for partial update of an action (manual edit)."""
+    status: Optional[ActionStatus] = None
+    description: Optional[str] = Field(None, min_length=1)
+    owner: Optional[str] = None
+
+
+class ActionCreate(BaseModel):
+    """Request body for manually creating an action (project-level or under a meeting)."""
+    description: str = Field(..., min_length=1, max_length=2000)
+    type: str = Field(default="task", description="task, decision, follow_up, question, other")
+    owner: Optional[str] = Field(None, max_length=200)
+
+
+class ProjectActionResponse(BaseModel):
+    """Action item with optional meeting_title for project-level action list."""
+    id: str
+    meeting_id: str
+    meeting_title: Optional[str] = None
+    type: str
+    description: str
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    status: ActionStatus = Field(default=ActionStatus.OPEN)
+    week_number: Optional[int] = None
+    owner: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+
 class MeetingResponse(BaseModel):
     """
     Response schema for meeting metadata.
@@ -177,6 +207,29 @@ class AIReconciliationResponse(BaseModel):
     new_actions: List[ReconciliationActionItem] = Field(default_factory=list)
     risk_flags: List[str] = Field(default_factory=list)
     summary: str = Field(..., description="Executive summary paragraph")
+
+
+class ProposalRequest(BaseModel):
+    """Request for a reconciliation proposal (no DB commit). Optional rejection feedback for re-proposal."""
+    meeting_title: str = Field(..., description="Title of new meeting")
+    transcript: str = Field(..., min_length=10, description="Meeting transcript")
+    week_number: int = Field(..., ge=1, description="Week number")
+    previous_proposal: Optional[AIReconciliationResponse] = Field(None, description="Previous proposal when user rejected")
+    rejection_feedback: Optional[str] = Field(None, description="User feedback on why they rejected the previous proposal")
+
+
+class ProposalResponse(BaseModel):
+    """Current project state plus AI proposal (no changes applied yet)."""
+    current_actions: List[ActionResponse] = Field(..., description="Current OPEN actions in the project")
+    proposal: AIReconciliationResponse = Field(..., description="Proposed completed/carryover/new and summary")
+
+
+class ApplyProposalRequest(BaseModel):
+    """Request to apply an approved proposal to the database."""
+    meeting_title: str = Field(..., description="Title of the meeting")
+    transcript: str = Field(..., min_length=10, description="Meeting transcript")
+    week_number: int = Field(..., ge=1, description="Week number")
+    proposal: AIReconciliationResponse = Field(..., description="The approved proposal to apply")
 
 
 class ReconciliationResponse(BaseModel):

@@ -1,0 +1,16 @@
+Project Gamma – Week 3 – 3 Feb 2026
+Attendees: Max, Zoe, Leo, Mia, Eli
+
+Max: Eli, how did the Postman run go?
+
+Eli: All green. I’ve documented the runbook in the wiki. So we’re at “staging live, spec and collection valid”. The only gap is we’re still on mocks. Product asked when we can point at real backends.
+
+Max: That’s the next milestone. I’ll put together a short plan for “wire to real services” and we can estimate. Zoe, anything to add to the spec before we call it locked?
+
+Zoe: I’ve added the token refresh section and the rate limit note. So from my side the spec is locked. I’ll version it and we can publish it for clients who want to start integrating.
+
+Leo: I ran a quick load test on the auth layer. We’re fine up to about 500 req/s per instance. Beyond that we might need to tune. I’ve added a note to the runbook.
+
+Mia: One more thing – we’ve had a request for a “service account” scope that can do admin on a subset of resources. I’ve added it to the matrix as optional for phase two. So we’re not blocking on it now, but it’s documented.
+
+Max: So we’re in good shape. Next: I’ll draft the “wire to real backends” plan and share for estimate. Zoe to publish the spec version. Eli to keep staging stable. Anything else? … Same time next week.

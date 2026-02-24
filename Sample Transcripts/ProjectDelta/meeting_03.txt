@@ -1,0 +1,22 @@
+Project Delta – Week 3 – 19 Feb 2026
+Attendees: Alex, Jordan, Sam, Taylor, Morgan
+
+Alex: Jordan, what did we get on the new ranking model?
+
+Jordan: NDCG went from 0.62 to 0.74 with the new model. So we’re in a good place. I’d like to run an A/B test in staging before we commit to production. We’ll need a way to serve two ranking models and compare.
+
+Taylor: Facets are in staging. I’ve run the Postman collection and the docs are updated. So from the API side we’re done for this phase. Users can filter by category, date, and source.
+
+Sam: I’ve profiled the index. The bottleneck was the bulk write. I’ve increased the batch size and added a short delay between batches so we don’t overwhelm the cluster. I’ll run a staging test this week and if it looks good we can plan the production rollout.
+
+Alex: So we’re on track. Jordan, for the A/B test – do we have the infra to serve two models, or do we need to build that?
+
+Jordan: We’d need a feature flag or a parameter so we can route a percentage of traffic to the new model. I’ll check with the platform team to see if there’s something we can reuse.
+
+Morgan: I can add more labelled data for the next iteration if Jordan wants to push the model further.
+
+Alex: So next steps: Jordan to figure out A/B setup for ranking. Sam to run the staging index test and draft the prod rollout plan. Taylor, anything else on facets?
+
+Taylor: I’m good. Maybe we add a “sort by relevance vs date” option in a follow-up, but that’s out of scope for now.
+
+Alex: Agreed. Same time next week.

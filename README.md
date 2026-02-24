@@ -2,17 +2,16 @@
 
 ## Overview
 
-The **Meeting → Actions AI Service** is a backend-focused REST API that converts raw meeting transcripts into structured, actionable items using Large Language Models (LLMs).
+A full-stack application that converts raw meeting transcripts into structured, trackable action items using Large Language Models. Upload a meeting transcript, review the AI's proposed changes side-by-side with the current project state, and approve or request revisions before anything is committed.
 
-This project was built as a **portfolio-grade backend MVP** to demonstrate strong fundamentals in:
+The project demonstrates:
 
-- REST API design
+- REST API design (FastAPI + Pydantic)
 - Backend architecture and separation of concerns
-- Data modeling and validation
-- AI integration patterns (with safe mocking for local development)
-- Production-aware design decisions
-
-The service is intentionally scoped to remain clear, testable, and extensible.
+- Data modeling and validation (SQLAlchemy + SQLite)
+- AI integration patterns (OpenAI / Anthropic, with mock mode for local development)
+- React frontend with a proposal-based review workflow
+- Docker Compose for single-command setup
 
 ---
 
@@ -57,18 +56,25 @@ Elena and David need to sync on S3 permissions.
 ## Architecture
 
 ```
-Client (Postman / curl)
+Browser (React SPA)
         |
-        v
-FastAPI Application
+        v   http://localhost:3000
+React Frontend
+        |
+        v   http://localhost:8000
+FastAPI Backend
 ├── Routes (HTTP layer)
-│   ├── /meetings
-│   └── /actions
+│   ├── /projects            # Project CRUD, list
+│   ├── /meetings            # Meeting creation and processing
+│   ├── /actions             # Action retrieval, update, delete
+│   └── /reconcile           # AI proposal & apply workflow
 │
 ├── Services (Business logic)
-│   └── ActionExtractor
+│   ├── ActionExtractor      # Extract actions from transcript
+│   └── ProjectReconciler    # Reconcile new transcript against existing actions
 │
 ├── Models (SQLAlchemy ORM)
+│   ├── Project
 │   ├── Meeting
 │   └── Action
 │
@@ -76,7 +82,7 @@ FastAPI Application
 │   ├── Request validation
 │   └── Response serialization
 │
-└── SQLite Database
+└── SQLite Database (persisted via Docker volume)
 ```
 
 ---
@@ -84,22 +90,37 @@ FastAPI Application
 ## Project Structure
 
 ```
-app/
-├── main.py                  # Application entrypoint
-├── config.py                # Environment-based configuration
-├── database.py              # Database engine and session management
-├── models.py                # SQLAlchemy ORM models
-├── schemas.py               # Pydantic request/response schemas
-├── routes/
-│   ├── meetings.py          # Meeting creation and processing endpoints
-│   └── actions.py           # Action retrieval endpoints
-└── services/
-    └── action_extractor.py  # AI and mock extraction logic
-
-requirements.txt
-.env.example
-README.md
-LICENSE
+├── app/                           # Backend (FastAPI)
+│   ├── main.py                    # Application entrypoint
+│   ├── config.py                  # Environment-based configuration
+│   ├── database.py                # Database engine and session management
+│   ├── models.py                  # SQLAlchemy ORM models
+│   ├── schemas.py                 # Pydantic request/response schemas
+│   ├── routes/
+│   │   ├── projects.py            # Project + reconciliation endpoints
+│   │   ├── meetings.py            # Meeting creation and processing
+│   │   └── actions.py             # Action update and delete
+│   └── services/
+│       ├── action_extractor.py    # AI extraction logic
+│       ├── project_reconciler.py  # Proposal / apply reconciliation
+│       └── report_generator.py    # Markdown report generation
+│
+├── frontend/                      # Frontend (React + Vite)
+│   ├── src/
+│   │   ├── App.tsx                # Router setup
+│   │   ├── api.ts                 # Backend API client
+│   │   └── pages/
+│   │       ├── ProjectList.tsx    # Project listing and creation
+│   │       └── ProjectDashboard.tsx  # Transcript upload, proposal review, actions
+│   ├── Dockerfile                 # Multi-stage Node build + serve
+│   └── package.json
+│
+├── Sample Transcripts/            # Example meeting transcripts (5 projects)
+├── Dockerfile                     # Backend Docker image
+├── docker-compose.yml             # Full-stack orchestration
+├── requirements.txt               # Python dependencies
+├── .env.example                   # Environment variable template
+└── README.md
 ```
 
 ---
@@ -154,42 +175,129 @@ This approach allows the system to remain fully functional while keeping AI conc
 
 ---
 
-## Running the Project Locally
+## Quick Start (Docker)
 
-### Prerequisites
+The recommended way to run the full application. Requires **Docker** and **Docker Compose**.
 
-- Python 3.10+
-
-### Setup
+### 1. Clone and configure
 
 ```bash
 git clone https://github.com/khalidtahir/Meeting-Actions-API
 cd Meeting-Actions-API
 
+cp .env.example .env
+```
+
+Open `.env` and set your OpenAI API key:
+
+```
+OPENAI_API_KEY=sk-...
+```
+
+> Without `OPENAI_API_KEY`, the app runs in **mock mode** -- all AI features return deterministic placeholder responses so you can explore the UI without any external API calls.
+
+### 2. Build and start
+
+```bash
+docker compose up --build
+```
+
+This builds both images, starts the API, waits for its health check to pass, then starts the frontend. First build takes a few minutes; subsequent runs are cached.
+
+### 3. Open the app
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| **Frontend** | http://localhost:3000 | React app -- start here |
+| **API** | http://localhost:8000 | FastAPI backend |
+| **API Docs** | http://localhost:8000/docs | Interactive OpenAPI / Swagger UI |
+
+### 4. Verify everything is working
+
+```bash
+# Both containers should show as running (api should be "healthy")
+docker compose ps
+
+# API health check
+curl http://localhost:8000/health
+# → {"status":"healthy","database":"connected","ai_provider":"openai"}
+
+# API logs
+docker compose logs api
+
+# Frontend logs
+docker compose logs frontend
+```
+
+Open http://localhost:3000 in your browser. You should see the project list page (empty on first run). Create a project, open it, and paste a sample transcript from the `Sample Transcripts/` directory to test the full workflow.
+
+### Stopping and restarting
+
+```bash
+# Stop all containers
+docker compose down
+
+# Stop and remove stored data (SQLite database)
+docker compose down -v
+
+# Restart without rebuilding
+docker compose up -d
+```
+
+SQLite data is persisted in a Docker volume (`api_data`), so project and action data survive normal restarts. Use `down -v` only when you want a clean slate.
+
+---
+
+## Running Without Docker (manual setup)
+
+If you prefer to run the backend and frontend directly on your machine.
+
+### Backend
+
+Requires **Python 3.10+**.
+
+```bash
+cp .env.example .env
+# Edit .env and set OPENAI_API_KEY (optional)
+
 python -m venv venv
-venv\Scripts\activate   # Windows
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS / Linux
 
-python -m pip install -r requirements.txt
-python app/main.py
+pip install -r requirements.txt
+cd app
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-### API Documentation
+API will be available at http://localhost:8000 (docs at http://localhost:8000/docs).
 
-Interactive OpenAPI documentation is available at:
+### Frontend
 
+Requires **Node.js 18+**.
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
-http://localhost:8000/docs
+
+Opens at http://localhost:5173 by default (Vite dev server). Set `VITE_API_URL` if the backend runs on a different host:
+
+```bash
+VITE_API_URL=http://localhost:8000 npm run dev
 ```
 
 ---
 
 ## Example Workflow
 
-1. Create a meeting
-2. Trigger transcript processing
-3. Retrieve extracted actions
+1. **Create a project** -- give it a name and optional description.
+2. **Upload a meeting transcript** -- paste the raw meeting minutes and click "Generate proposal."
+3. **Review the AI proposal** -- see current open actions side-by-side with proposed completions, carryovers, and new items.
+4. **Approve or reject** -- approve to commit changes to the database, or reject with feedback and the AI will revise its proposal.
+5. **Track action items** -- view all actions grouped by owner, manually add or edit items, and upload subsequent meeting transcripts to keep the project up to date.
 
-This mirrors real-world asynchronous workflows while remaining synchronous for simplicity.
+Sample transcripts for five fictional projects are included in `Sample Transcripts/` to get started quickly.
 
 ---
 
