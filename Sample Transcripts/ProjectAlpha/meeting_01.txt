@@ -1,0 +1,34 @@
+Project Alpha – Kickoff – 12 Jan 2026
+Attendees: Sarah, David, Elena, James, Priya
+
+Sarah: Thanks everyone for making it. Let’s use this first session to align on what we’re actually building and how we’ll work. I’ll put a short agenda in the chat in a sec.
+
+David: Before we get into the roadmap, can we nail down the scope? I’ve seen three different versions of the “API redesign” doc.
+
+Sarah: Good call. The scope we’re committing to is: public API v2, same surface area as v1 but with the new auth model and the S3-backed upload flow. No internal admin APIs in this project.
+
+Elena: So the pipeline that generates the reports – that stays on the current stack for now, and we’re only changing how clients call in?
+
+Sarah: Right. The pipeline stays. We’re replacing the HTTP API that clients use to submit data and then poll for results. So the goal is: by end of Q2 we ship API v2 behind a feature flag, run both in parallel for a month, then sunset v1.
+
+James: What’s the auth model? I’ve been assuming OAuth2 client credentials for service-to-service.
+
+Sarah: Yes. Client credentials for service-to-service. For any human-facing flows we’ll do a separate project later. This project is only the programmatic API.
+
+Priya: Who’s driving the timeline and the cutover plan? I want to make sure we have a clear “go” and “no-go” and who signs off.
+
+Sarah: I’ll own the overall timeline and the cutover checklist. David, can you own the API spec and the contract so we know exactly what v2 looks like?
+
+David: Yeah. I’ll draft the OpenAPI spec and the migration guide so clients know what’s changing. I’ll need input from Elena on the new upload flow – like, does the client still get a job ID and poll, or is it webhook-only?
+
+Elena: Right now it’s poll-only. We’ve talked about webhooks but that’s not in scope for v2. So for this project it stays: submit, get job ID, poll until done. The only change is the submit endpoint uses the new auth and the new S3 path under the hood.
+
+James: I’ve been seeing 403s on the Currency API in staging. I’m not sure yet if it’s our code or the upstream. I’ll dig in and document what we find so we don’t block the redesign.
+
+Priya: Can we agree that we’ll do a retro after each milestone? I’d rather not wait until the end to fix how we’re working.
+
+Sarah: Agreed. So for next time: David to get the API spec and migration guide to a first draft. Elena to confirm the submit-and-poll behaviour and document it. James to investigate the Currency API 403 and share findings. Priya to send the high-level timeline and cutover ownership to the group. And we’ll do a short retro after the first milestone. Anything else?
+
+David: I’ll need S3 permissions from DevOps to test the new path. I’ll open a ticket today.
+
+Sarah: Good. Let’s wrap and same time next week.

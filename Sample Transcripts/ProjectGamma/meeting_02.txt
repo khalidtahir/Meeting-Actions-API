@@ -1,0 +1,24 @@
+Project Gamma – Week 2 – 27 Jan 2026
+Attendees: Max, Zoe, Leo, Mia, Eli
+
+Max: Quick status. Mia, scope matrix?
+
+Mia: Done. I’ve shared the doc. We have three levels – read, write, admin – per resource. So for example “projects:read”, “projects:write”, “projects:admin”. I’ve listed which clients get which. Leo and Zoe have it.
+
+Leo: I’ve implemented the JWT validation and the scope check middleware. So every request hits the middleware, we validate the token and then check that the required scope is in the token. I’ve added a few unit tests. One open question: token refresh. Right now we’re not issuing tokens, so we’re not handling refresh. Do we need to document the expected refresh flow for clients?
+
+Max: Yes. Let’s document it in the spec – assume tokens have an expiry and clients will get new ones from the identity provider. Zoe, can you add a “Token and refresh” section to the OpenAPI description?
+
+Zoe: I’ll add it. The spec is in good shape; I’ve added all the main endpoints and the security schemes. Postman collection is updated. Eli, can you run the collection against staging once it’s up?
+
+Eli: Staging is up. I’ve run the health check and a couple of manual calls. I’ll run the full Postman collection and share the results. One thing: we’re not yet wired to the real backends – it’s still mock responses. When do we plug in the real services?
+
+Max: Next phase. For this milestone we just need “staging live, auth and scopes working, spec and collection valid”. So mock responses are fine for now. Zoe, after Leo’s refresh doc, do we need anything else for “spec locked”?
+
+Zoe: I’d like to add rate limit placeholders – like, we’ll have rate limits but the numbers are TBD. So the spec will say “rate limits apply” and we’ll fill in the numbers later.
+
+Max: Fine. So: Zoe to add token refresh and rate limit placeholders to the spec. Eli to run the Postman collection and report. Leo, anything else?
+
+Leo: I’m good. We can do a quick load test next if we want to stress the auth layer.
+
+Max: Let’s add that to next week. Same time next week.

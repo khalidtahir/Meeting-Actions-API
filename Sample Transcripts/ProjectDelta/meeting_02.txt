@@ -1,0 +1,14 @@
+Project Delta – Week 2 – 12 Feb 2026
+Attendees: Alex, Jordan, Sam, Taylor, Morgan
+
+Alex: Status round. Jordan, how’s the baseline?
+
+Jordan: I’ve got the labelled set from Morgan and I’ve run the current model. NDCG is around 0.62. I’m prototyping a new ranking model and I’ll have a first comparison by next week. So we’ll know if we’re moving the needle.
+
+Morgan: Good. I can add more labelled examples if you need them – we’ve had more tickets come in.
+
+Taylor: Faceted search is in progress. I’ve added the params to the API and I’m wiring them to the query layer. Category and date are done; source is next. I’ll have it in staging by end of week.
+
+Sam: Index pipeline – I’ve designed the incremental update flow. We’ll process a queue of “changed items” and update the index in small batches. I’m not ready to run it in prod yet; I’ll need a staging run and a rollback plan. One blocker: during peak we’re seeing slow index writes. We might need to tune the batch size or add more capacity.
+
+Alex: So we have a potential perf issue on the index. Sam, can you profile and propose a fix? Jordan and Taylor, keep going. Morgan, stay available for more labels. Next week let’s see the new ranking numbers and the facets in staging. Same time next week.

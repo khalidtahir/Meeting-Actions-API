@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env
+*.db
+__pycache__
+venv
+node_modules
+frontend/dist
+Sample Transcripts
+*.md
+.cursor
+.venv

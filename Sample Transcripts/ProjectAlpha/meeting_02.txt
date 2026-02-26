@@ -1,0 +1,26 @@
+Project Alpha – Week 2 sync – 19 Jan 2026
+Attendees: Sarah, David, Elena, James, Priya
+
+Sarah: Quick round: where we are vs what we said we’d do last week.
+
+David: I’ve got the OpenAPI spec to a point where it’s reviewable. The migration guide is still a stub – I’ll add the “what’s different” section by Friday. One thing: I still don’t have S3 access. I’ve chased DevOps twice. Without that I can’t run the new upload path end-to-end.
+
+Elena: I’ve documented the submit-and-poll flow in the wiki and linked it from the spec. So that part’s done. On S3: I have access. I can run the pipeline and confirm the new path works; David, if you want we can pair and you use my env until your access is sorted.
+
+David: That would unblock me. Let’s do that tomorrow.
+
+James: The 403 on the Currency API – it was a missing header. Our client wasn’t sending the new auth header that we rolled out last month. I’ve fixed it in the branch and opened a PR. So that’s done. I’ll add a note to the migration guide so clients don’t hit the same thing.
+
+Priya: Timeline and cutover – I’ve sent the one-pager. Sarah and I will own the go/no-go. First milestone is “spec and migration guide approved” – target end of this week.
+
+Sarah: So we’re in good shape. David and Elena, sync on S3 and get the E2E run done. James, PR looks good. One new thing: we’ve had a couple of questions about rate limits. Do we have a number for v2?
+
+Elena: Not yet. I’d say we need to decide before we lock the spec. David, can we add a “rate limits” section and leave the numbers TBD for now?
+
+David: I’ll add the section and flag it for product to confirm the numbers.
+
+Sarah: Next week let’s do the retro we talked about. Priya, can you send a short “what went well / what to improve” template so people can come with notes?
+
+Priya: Will do.
+
+Sarah: Thanks everyone. Same time next week.

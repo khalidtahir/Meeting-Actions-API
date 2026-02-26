@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Meeting, Action
-from schemas import MeetingActionsResponse, ActionResponse
+from schemas import MeetingActionsResponse, ActionResponse, ActionUpdate
 
 router = APIRouter(prefix="/meetings", tags=["actions"])
 
@@ -61,3 +61,59 @@ def get_action(
         )
     
     return action
+
+
+@router.patch("/{meeting_id}/actions/{action_id}", response_model=ActionResponse)
+def update_action(
+    meeting_id: str,
+    action_id: str,
+    data: ActionUpdate,
+    db: Session = Depends(get_db)
+):
+    """
+    Partially update an action (status, description, owner).
+    """
+    action = db.query(Action).filter(
+        Action.id == action_id,
+        Action.meeting_id == meeting_id
+    ).first()
+    
+    if not action:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Action {action_id} not found in meeting {meeting_id}"
+        )
+    
+    if data.status is not None:
+        action.status = data.status
+    if data.description is not None:
+        action.description = data.description
+    if data.owner is not None:
+        action.owner = data.owner
+    
+    db.commit()
+    db.refresh(action)
+    return action
+
+
+@router.delete("/{meeting_id}/actions/{action_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_action(
+    meeting_id: str,
+    action_id: str,
+    db: Session = Depends(get_db)
+):
+    """Delete an action item."""
+    action = db.query(Action).filter(
+        Action.id == action_id,
+        Action.meeting_id == meeting_id
+    ).first()
+    
+    if not action:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Action {action_id} not found in meeting {meeting_id}"
+        )
+    
+    db.delete(action)
+    db.commit()
+    return None

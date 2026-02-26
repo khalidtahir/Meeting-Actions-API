@@ -1,0 +1,32 @@
+Project Gamma – Platform API kickoff – 20 Jan 2026
+Attendees: Max, Zoe, Leo, Mia, Eli
+
+Max: We’re here to kick off the platform API project. The goal is to give internal and eventually external clients a single, consistent API for all core resources, with proper auth and rate limiting.
+
+Zoe: So we’re building a new API layer that sits in front of the existing services? Or are we replacing the current endpoints?
+
+Max: We’re not replacing them yet. We’re building the new API as a separate surface – same backend services, but a new route and contract. So clients can migrate over time. The old APIs stay until we deprecate them.
+
+Leo: What’s the auth model? I’ve been assuming we’ll use JWT and scope-based access so we can say “this client can read projects but not delete”.
+
+Max: Yes. JWT with scopes. We need a matrix of “which client gets which scopes”. Mia, can you own that – like, what are the resources and what are the read/write/admin levels?
+
+Mia: I can. I’ll need to sit with product to make sure we’re not over-scoping. I’ll have a first pass in a week and we can review.
+
+Eli: Where will this API run? Same cluster as the current app or a dedicated one?
+
+Max: Same cluster for now. We’ll add a new service that’s just the platform API. So we need a clear path to deploy it and wire it to the existing backends. Eli, can you own the deployment and env setup?
+
+Eli: I’ll set up a staging env and the pipeline. I’ll need the repo and the list of dependencies from you, Zoe, once you have the spec.
+
+Zoe: I’ll own the API spec – OpenAPI – and a Postman collection so we can test. I’ll need the scope list from Mia to document which endpoints require which scopes. Leo, for the auth layer, are you implementing validation only or also token issuance?
+
+Leo: For this project, validation only. We’ll validate JWTs that are issued elsewhere – identity provider or our own token service in a later phase. So the platform API just checks the JWT and the scopes.
+
+Max: So the sequence is: Mia delivers the scope matrix, Zoe produces the OpenAPI spec and Postman collection, Leo implements JWT validation and scope checks, Eli gets staging and the pipeline ready. We’re targeting “staging live and callable” in four weeks. Any blockers?
+
+Eli: I’ll need the repo created and at least a hello-world endpoint to wire the pipeline. Can we have that by end of week?
+
+Zoe: I’ll create the repo and a minimal spec so you can deploy. We’ll iterate from there.
+
+Max: Good. So next steps: Mia to deliver scope matrix. Zoe to create repo, minimal spec, and Postman collection. Leo to implement JWT validation once we have the scope list. Eli to set up staging and pipeline. Same time next week.

@@ -12,7 +12,12 @@ from sqlalchemy.orm import Session
 
 from config import get_settings
 from models import Action, ActionStatus, Meeting, MeetingStatus
-from schemas import AIReconciliationResponse, PriorActionReference, ReconciliationActionItem
+from schemas import (
+    AIReconciliationResponse,
+    PriorActionReference,
+    ReconciliationActionItem,
+)
+from typing import Optional
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -79,10 +84,12 @@ class ProjectReconciler:
                 Action.status == ActionStatus.OPEN
             ).all()
             
-            # Call LLM for reconciliation
+            # Call LLM for reconciliation (no rejection feedback in direct reconcile)
             reconciliation = self._call_llm_reconcile(
                 open_actions=open_actions,
-                transcript=transcript
+                transcript=transcript,
+                previous_proposal=None,
+                rejection_feedback=None,
             )
             
             # Deterministically update database based on LLM response
@@ -104,28 +111,91 @@ class ProjectReconciler:
         except Exception as e:
             db.rollback()
             raise ProjectReconciliationError(f"Reconciliation failed: {str(e)}")
-    
+
+    def get_proposal(
+        self,
+        db: Session,
+        project_id: str,
+        meeting_title: str,
+        transcript: str,
+        week_number: int,
+        previous_proposal: Optional[AIReconciliationResponse] = None,
+        rejection_feedback: Optional[str] = None,
+    ) -> Tuple[List[Action], AIReconciliationResponse]:
+        """
+        Generate a reconciliation proposal without writing to the database.
+        Returns (current OPEN actions, proposal).
+        When rejection_feedback is provided, the LLM is asked to revise the previous proposal.
+        """
+        open_actions = db.query(Action).join(Meeting).filter(
+            Meeting.project_id == project_id,
+            Action.status == ActionStatus.OPEN
+        ).all()
+        reconciliation = self._call_llm_reconcile(
+            open_actions=open_actions,
+            transcript=transcript,
+            previous_proposal=previous_proposal,
+            rejection_feedback=rejection_feedback,
+        )
+        return open_actions, reconciliation
+
+    def apply_proposal(
+        self,
+        db: Session,
+        project_id: str,
+        meeting_title: str,
+        transcript: str,
+        week_number: int,
+        proposal: AIReconciliationResponse,
+    ) -> Tuple[Meeting, dict]:
+        """
+        Apply an approved proposal: create meeting, apply reconciliation, commit.
+        Returns (meeting, update_summary).
+        """
+        try:
+            meeting = Meeting(
+                project_id=project_id,
+                title=meeting_title,
+                transcript=transcript,
+                status=MeetingStatus.PENDING,
+            )
+            db.add(meeting)
+            db.flush()
+            open_actions = db.query(Action).join(Meeting).filter(
+                Meeting.project_id == project_id,
+                Action.status == ActionStatus.OPEN
+            ).all()
+            summary = self._apply_reconciliation(
+                db=db,
+                meeting=meeting,
+                open_actions=open_actions,
+                reconciliation=proposal,
+                week_number=week_number,
+            )
+            meeting.status = MeetingStatus.DONE
+            db.commit()
+            db.refresh(meeting)
+            return meeting, summary
+        except Exception as e:
+            db.rollback()
+            raise ProjectReconciliationError(f"Apply proposal failed: {str(e)}")
+
     def _call_llm_reconcile(
         self,
         open_actions: List[Action],
-        transcript: str
+        transcript: str,
+        previous_proposal: Optional[AIReconciliationResponse] = None,
+        rejection_feedback: Optional[str] = None,
     ) -> AIReconciliationResponse:
         """
         Call LLM once with structured prompt for reconciliation.
-        
-        Args:
-            open_actions: List of currently OPEN actions
-            transcript: New meeting transcript
-            
-        Returns:
-            Parsed AIReconciliationResponse with structured JSON
-            
-        Raises:
-            ProjectReconciliationError: If LLM call fails or returns invalid JSON
+        Optionally include previous_proposal and rejection_feedback for a revised proposal.
         """
         # Handle mock mode
         if not self.settings.ai_api_key:
-            return self._generate_mock_reconciliation(open_actions, transcript)
+            return self._generate_mock_reconciliation(
+                open_actions, transcript, previous_proposal, rejection_feedback
+            )
         
         # Initialize client if needed
         if self.client is None:
@@ -137,8 +207,9 @@ class ProjectReconciler:
                 raise ValueError(f"Unsupported AI provider: {self.settings.ai_provider}")
         
         try:
-            # Build prompt
-            prompt = self._build_reconciliation_prompt(open_actions, transcript)
+            prompt = self._build_reconciliation_prompt(
+                open_actions, transcript, previous_proposal, rejection_feedback
+            )
             
             # Call appropriate provider
             if self.settings.ai_provider == "openai":
@@ -155,17 +226,14 @@ class ProjectReconciler:
     def _build_reconciliation_prompt(
         self,
         open_actions: List[Action],
-        transcript: str
+        transcript: str,
+        previous_proposal: Optional[AIReconciliationResponse] = None,
+        rejection_feedback: Optional[str] = None,
     ) -> str:
         """
         Build structured prompt for LLM reconciliation.
-        
-        Input: Prior open actions (with IDs) + new transcript
-        Output: Structured JSON referencing action IDs for completed/carryover
-        
-        Critical: Action IDs must be used for matching, not descriptions.
+        If previous_proposal and rejection_feedback are set, ask for a revised proposal.
         """
-        # Format open actions as JSON with required ID field
         open_actions_json = json.dumps([
             {
                 "id": action.id,
@@ -175,6 +243,20 @@ class ProjectReconciler:
             }
             for action in open_actions
         ], indent=2)
+
+        revision_instruction = ""
+        if previous_proposal is not None and rejection_feedback:
+            prev_json = json.dumps(previous_proposal.model_dump(), indent=2)
+            revision_instruction = f"""
+
+The user reviewed a previous proposal and rejected it with this feedback:
+"{rejection_feedback}"
+
+Previous proposal was:
+{prev_json}
+
+Produce a REVISED proposal that addresses their feedback. Use the same JSON format. Only change what the user asked for.
+"""
         
         return f"""You are an AI assistant that reconciles action items across meetings.
 
@@ -199,6 +281,7 @@ Prior OPEN Actions:
 
 New Meeting Transcript:
 {transcript}
+{revision_instruction}
 
 Return ONLY valid JSON in this EXACT format, with no additional text or commentary:
 {{
@@ -435,19 +518,18 @@ JSON Response:"""
     def _generate_mock_reconciliation(
         self,
         open_actions: List[Action],
-        transcript: str
+        transcript: str,
+        previous_proposal: Optional[AIReconciliationResponse] = None,
+        rejection_feedback: Optional[str] = None,
     ) -> AIReconciliationResponse:
         """
         Generate deterministic mock reconciliation for testing without API key.
-        Uses ID-based matching to match new schema format.
+        If rejection_feedback is given, swap one completed to carryover (or vice versa) to simulate revision.
         """
         completed = []
         carryover = []
-        
-        # Simple heuristic: if action description appears in transcript, mark completed
         for action in open_actions:
             if action.description.lower() in transcript.lower():
-                # Completed: include original ID
                 item = PriorActionReference(
                     id=action.id,
                     description=action.description,
@@ -455,28 +537,33 @@ JSON Response:"""
                 )
                 completed.append(item)
             else:
-                # Carryover: include original ID
                 item = PriorActionReference(
                     id=action.id,
                     description=action.description,
                     owner=action.owner
                 )
                 carryover.append(item)
-        
-        # Mock new actions from transcript (no IDs)
         new_actions = [
             ReconciliationActionItem(
                 description="Review meeting notes and send summary to team",
                 owner="Meeting Organizer"
             )
         ]
-        
+        if rejection_feedback and previous_proposal and "completed" in rejection_feedback.lower():
+            if completed:
+                c = completed.pop()
+                carryover.append(c)
+            summary = "Revised per user feedback: some items moved from completed to carryover."
+        elif rejection_feedback and previous_proposal:
+            summary = "Revised proposal per user feedback."
+        else:
+            summary = "Meeting covered planned topics. Some actions have been completed, while others require continued attention in next period."
         return AIReconciliationResponse(
             completed=completed,
             carryover=carryover,
             new_actions=new_actions,
             risk_flags=["Ensure follow-up actions are assigned to specific owners"],
-            summary="Meeting covered planned topics. Some actions have been completed, while others require continued attention in next period."
+            summary=summary,
         )
 
 

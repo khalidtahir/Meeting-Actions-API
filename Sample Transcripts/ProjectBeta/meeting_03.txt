@@ -1,0 +1,22 @@
+Project Beta – Week 3 – 17 Feb 2026
+Attendees: Nina, Omar, Lisa, Ken, Jade
+
+Nina: Omar, what did we learn from the full set of interviews?
+
+Omar: I’ve sent the write-up. Bottom line: almost everyone said they wanted to “do one thing” the first time – create a task, add a reminder, or check something off. So I’m recommending we make “complete one task” the first action. We give them a pre-filled example task and they just tap complete. That way we get a “first action done” moment without asking them to think of something.
+
+Jade: That’s clear. I’ll start the mocks with that – land on a single “example task” and one big “Complete” button. We can refine the copy and the follow-up screen once we have the flow.
+
+Lisa: From the competitor work, one risk was backlash on change. So for beta I’d suggest we only show the new flow to half of new users and keep the old flow for the other half. That way we can compare and roll back if we need to.
+
+Nina: Ken, can we do that from an analytics and feature-flag perspective?
+
+Ken: Yeah. I’ll own the 50/50 split and the events so we can measure “completed first action” and retention by cohort.
+
+Omar: One blocker – recruitment for the next round is slow. I’d like to do a second round of interviews after we have a prototype. I’ll need help from marketing to get more people in the funnel.
+
+Nina: I’ll chase marketing. So for next time: Jade to have a first pass of the new flow mocks. Ken to implement the 50/50 and events. Omar to plan the second interview round and I’ll unblock recruitment. Lisa, can you add the “rollback and A/B” piece to the beta runbook?
+
+Lisa: I’ll add it this week.
+
+Nina: Thanks everyone. Same time next week.
